@@ -1,6 +1,5 @@
 ### Temat 2: Aplikacja lista zakupów
 
-
 Funkcjonalności:
 1. Dodanie lisy o konkretnym tytule i pozycji do niej.
 2. Wyszukanie listy po nazwie i jej wyświetlenie.
