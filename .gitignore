@@ -1,0 +1,18 @@
+# Ignoruj foldery konfiguracyjne IDE
+.idea/
+.vscode/
+
+# Ignoruj pliki tymczasowe Pythona
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignoruj środowiska wirtualne
+venv/
+env/
+.venv/
+
+# Ignoruj inne pliki systemowe
+.DS_Store
+Thumbs.db
