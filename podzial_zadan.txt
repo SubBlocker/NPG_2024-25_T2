@@ -1,1 +1,6 @@
-tu będzie podział zadan
+1. Antoni i Krzysiek:
+-dodawnaie list, zapis i odczyt list z plików
+2. Natalia i Alexander:
+-przeszukiwanie list po nazwie i artkulach, historia
+3. Szymon:
+-zarządzanie główną strukturą programu
