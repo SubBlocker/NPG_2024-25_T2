@@ -4,3 +4,5 @@
 -przeszukiwanie list po nazwie i artkulach, historia
 3. Szymon:
 -zarządzanie główną strukturą programu
+
+To nie muszą być ostateczne zadania, napisaliśmy je tylko na dzisiejsze ćwiczenia!!!
