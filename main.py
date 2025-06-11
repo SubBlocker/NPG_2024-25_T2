@@ -1,136 +1,113 @@
+#Budujemy na tym pliku, tu działa autozapis do .txt
+
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import messagebox, simpledialog, filedialog
 import os
-import subprocess
 
-SZABLON_KODU = '''from tkinter import *
-from tkinter import messagebox
+# Plik do automatycznego zapisu
+PLIK = "listy_zakupow.txt"
 
-def newTask():
-    task = my_entry.get()
-    if task != "":
-        lb.insert(END, task)
-        my_entry.delete(0, "end")
-    else:
-        messagebox.showwarning("warning", "Please enter some task.")
+class AplikacjaListaZakupow:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Lista Zakupów")
 
-def deleteTask():
-    lb.delete(ANCHOR)
+        self.listy = {}  # Słownik przechowujący listy zakupów
 
-ws = Tk()
-ws.geometry('500x450+500+200')
-ws.title('{tytul}')
-ws.config(bg='#223441')
-ws.resizable(width=False, height=False)
+        # Interfejs użytkownika (buttony)
+        self.title_entry = tk.Entry(root)
+        self.title_entry.pack()
 
-frame = Frame(ws)
-frame.pack(pady=10)
+        self.add_list_button = tk.Button(root, text="Dodaj listę", command=self.dodaj_liste)
+        self.add_list_button.pack()
 
-lb = Listbox(
-    frame,
-    width=25,
-    height=8,
-    font=('Times', 18),
-    bd=0,
-    fg='#464646',
-    highlightthickness=0,
-    selectbackground='#a6a6a6',
-    activestyle="none",
-)
-lb.pack(side=LEFT, fill=BOTH)
+        self.search_button = tk.Button(root, text="Szukaj listy", command=self.szukaj_listy)
+        self.search_button.pack()
 
-task_list = [
-    'Eat apple',
-    'drink water',
-    'go gym',
-    'write software',
-    'write documentation',
-    'take a nap',
-    'Learn something',
-    'paint canvas'
-]
+        self.save_button = tk.Button(root, text="Zapisz do pliku", command=self.zapisz_do_pliku)
+        self.save_button.pack()
 
-for item in task_list:
-    lb.insert(END, item)
+        self.listbox = tk.Listbox(root)
+        self.listbox.pack()
+        self.listbox.bind('<Double-1>', self.edytuj_lub_usun_liste)
 
-sb = Scrollbar(frame)
-sb.pack(side=RIGHT, fill=BOTH)
+        self.wczytaj_liste()
+        self.odswiez_liste()
 
-lb.config(yscrollcommand=sb.set)
-sb.config(command=lb.yview)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-my_entry = Entry(ws, font=('times', 24))
-my_entry.pack(pady=20)
+        # Funkcjonalności (funkcje listy zakupów)
+    def dodaj_liste(self):          #możemy zrobić wyskakujące okienko zamiast paska na górze
+        tytul = self.title_entry.get().strip()
+        if not tytul:
+            messagebox.showwarning("Błąd", "Podaj tytuł listy")
+            return
 
-button_frame = Frame(ws)
-button_frame.pack(pady=20)
+        if tytul in self.listy:
+            messagebox.showwarning("Błąd", "Lista o tym tytule już istnieje")
+            return
 
-addTask_btn = Button(
-    button_frame,
-    text='Add Task',
-    font=('times 14'),
-    bg='#c5f776',
-    padx=20,
-    pady=10,
-    command=newTask
-)
-addTask_btn.pack(fill=BOTH, expand=True, side=LEFT)
+        pozycje = simpledialog.askstring("Pozycje", "Wprowadź pozycje oddzielone przecinkami")
+        if pozycje:
+            self.listy[tytul] = [p.strip() for p in pozycje.split(',')]
+            self.odswiez_liste()
 
-delTask_btn = Button(
-    button_frame,
-    text='Delete Task',
-    font=('times 14'),
-    bg='#ff8b61',
-    padx=20,
-    pady=10,
-    command=deleteTask
-)
-delTask_btn.pack(fill=BOTH, expand=True, side=LEFT)
+    def szukaj_listy(self):         #to możemy poprawić żeby actually szukało
+        nazwa = simpledialog.askstring("Szukaj", "Podaj nazwę listy")
+        if nazwa in self.listy:
+            pozycje = self.listy[nazwa]
+            messagebox.showinfo(f"Lista: {nazwa}", "\n".join(pozycje))
+        else:
+            messagebox.showwarning("Nie znaleziono", "Brak listy o podanej nazwie")
 
-ws.mainloop()
-'''
+    def zapisz_do_pliku(self):
+        sciezka = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Pliki tekstowe", "*.txt")])
+        if sciezka:
+            with open(sciezka, 'w', encoding='utf-8') as f:
+                for tytul, pozycje in self.listy.items():
+                    f.write(f"{tytul}:{','.join(pozycje)}\n")
+            messagebox.showinfo("Zapisano", f"Zapisano do {sciezka}")
 
-def odswiez_liste():
-    listbox.delete(0, tk.END)
-    for plik in os.listdir("."):
-        if plik.startswith("lista_") and plik.endswith(".py"):
-            listbox.insert(tk.END, plik)
+    def edytuj_lub_usun_liste(self, event):     #to należy zmienić żeby nie usuwało
+        wybor = self.listbox.curselection()
+        if not wybor:
+            return
+        tytul = self.listbox.get(wybor)
 
-def utworz_liste():
-    nazwa = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
-    if not nazwa:
-        return
-    filename = f"lista_{nazwa}.py"
-    if os.path.exists(filename):
-        messagebox.showwarning("Błąd", "Taki plik już istnieje!")
-        return
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(SZABLON_KODU.format(tytul=nazwa))
-    odswiez_liste()
+        akcja = messagebox.askquestion("Edycja lub usunięcie", "Czy chcesz edytować tę listę? (Nie = usuń)")
+        if akcja == 'yes':
+            nowe_pozycje = simpledialog.askstring("Edytuj pozycje", "Nowe pozycje oddzielone przecinkami", 
+                initialvalue=", ".join(self.listy[tytul]))
+            if nowe_pozycje:
+                self.listy[tytul] = [p.strip() for p in nowe_pozycje.split(',')]
+        else:
+            del self.listy[tytul]
+        self.odswiez_liste()
 
-def usun_liste():
-    selected = listbox.get(tk.ACTIVE)
-    if selected:
-        confirm = messagebox.askyesno("Potwierdź", f"Usunąć plik {selected}?")
-        if confirm:
-            os.remove(selected)
-            odswiez_liste()
+    def odswiez_liste(self):
+        self.listbox.delete(0, tk.END)
+        for tytul in self.listy:
+            self.listbox.insert(tk.END, tytul)
 
-def uruchom_liste():
-    selected = listbox.get(tk.ACTIVE)
-    if selected:
-        subprocess.Popen(["python", selected])
+    def zapisz_liste(self):
+        with open(PLIK, 'w', encoding='utf-8') as f:
+            for tytul, pozycje in self.listy.items():
+                f.write(f"{tytul}:{','.join(pozycje)}\n")
 
-# GUI zarządcy
-root = tk.Tk()
-root.title("Zarządca list zadań")
+    def wczytaj_liste(self):
+        if os.path.exists(PLIK):
+            with open(PLIK, 'r', encoding='utf-8') as f:
+                for linia in f:
+                    if ':' in linia:
+                        tytul, pozycje = linia.strip().split(':', 1)
+                        self.listy[tytul] = [p.strip() for p in pozycje.split(',') if p.strip()]
 
-listbox = tk.Listbox(root, width=40)
-listbox.pack(pady=5)
+    def on_close(self):
+        self.zapisz_liste()
+        self.root.destroy()
 
-tk.Button(root, text="➕ Utwórz nową listę", command=utworz_liste).pack(fill="x")
-tk.Button(root, text="▶️ Uruchom zaznaczoną", command=uruchom_liste).pack(fill="x")
-tk.Button(root, text="🗑 Usuń zaznaczoną", command=usun_liste).pack(fill="x")
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = AplikacjaListaZakupow(root)
+    root.mainloop()
 
-odswiez_liste()
-root.mainloop()

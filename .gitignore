@@ -16,3 +16,6 @@ env/
 # Ignoruj inne pliki systemowe
 .DS_Store
 Thumbs.db
+
+# Ignoruj listy zapisywane przez program
+*.txt
