@@ -14,9 +14,7 @@ class AplikacjaListaZakupow:
 
         self.listy = {}  # Słownik przechowujący listy zakupów
 
-        # Interfejs użytkownika (buttony)
-        self.title_entry = tk.Entry(root)
-        self.title_entry.pack()
+        # Interfejs użytkownika
 
         self.add_list_button = tk.Button(root, text="Dodaj listę", command=self.dodaj_liste)
         self.add_list_button.pack()
@@ -37,20 +35,21 @@ class AplikacjaListaZakupow:
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Funkcjonalności (funkcje listy zakupów)
-    def dodaj_liste(self):          #możemy zrobić wyskakujące okienko zamiast paska na górze
-        tytul = self.title_entry.get().strip()
+    def dodaj_liste(self):
+        tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
         if not tytul:
             messagebox.showwarning("Błąd", "Podaj tytuł listy")
             return
-
         if tytul in self.listy:
             messagebox.showwarning("Błąd", "Lista o tym tytule już istnieje")
             return
-
         pozycje = simpledialog.askstring("Pozycje", "Wprowadź pozycje oddzielone przecinkami")
         if pozycje:
             self.listy[tytul] = [p.strip() for p in pozycje.split(',')]
             self.odswiez_liste()
+        
+        
+        
 
     def szukaj_listy(self):         #to możemy poprawić żeby actually szukało
         nazwa = simpledialog.askstring("Szukaj", "Podaj nazwę listy")
