@@ -19,6 +19,9 @@ class AplikacjaListaZakupow:
         self.add_list_button = tk.Button(root, text="Dodaj listę", command=self.dodaj_liste)
         self.add_list_button.pack()
 
+        self.delete_list_button = tk.Button(root, text="Usuń listę", command=self.usun_liste)
+        self.delete_list_button.pack()
+
         self.search_button = tk.Button(root, text="Szukaj listy", command=self.szukaj_listy)
         self.search_button.pack()
 
@@ -35,21 +38,29 @@ class AplikacjaListaZakupow:
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Funkcjonalności (funkcje listy zakupów)
-    def dodaj_liste(self):
+
+    def dodaj_liste(self):          #możemy zrobić wyskakujące okienko zamiast paska na górze
         tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
-        if not tytul:
+        while not tytul:
             messagebox.showwarning("Błąd", "Podaj tytuł listy")
-            return
+            tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
+
         if tytul in self.listy:
             messagebox.showwarning("Błąd", "Lista o tym tytule już istnieje")
-            return
+            tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
+
         pozycje = simpledialog.askstring("Pozycje", "Wprowadź pozycje oddzielone przecinkami")
         if pozycje:
             self.listy[tytul] = [p.strip() for p in pozycje.split(',')]
             self.odswiez_liste()
-        
-        
-        
+
+    def usun_liste(self):
+        wybor = self.listbox.curselection()
+        if not wybor:
+            return
+        tytul = self.listbox.get(wybor)
+        del self.listy[tytul]
+        self.odswiez_liste()
 
     def szukaj_listy(self):         #to możemy poprawić żeby actually szukało
         nazwa = simpledialog.askstring("Szukaj", "Podaj nazwę listy")
@@ -109,4 +120,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = AplikacjaListaZakupow(root)
     root.mainloop()
-
