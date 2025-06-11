@@ -11,43 +11,59 @@ class AplikacjaListaZakupow:
     def __init__(self, root):
         self.root = root
         self.root.title("Lista Zakupów")
+        self.root.geometry("400x500")
+        self.root.resizable(False, False)
+        self.root.configure(bg="#f0f0f0")
 
         self.listy = {}  # Słownik przechowujący listy zakupów
 
+        # Nagłówek
+        self.label = tk.Label(root, text="Twoje Listy Zakupów", font=("Arial", 16, "bold"), bg="#f0f0f0")
+        self.label.pack(pady=10)
+
         # Interfejs użytkownika
+        self.przyciski_frame = tk.Frame(root, bg="#f0f0f0")
+        self.przyciski_frame.pack(pady=5)
 
-        self.add_list_button = tk.Button(root, text="Dodaj listę", command=self.dodaj_liste)
-        self.add_list_button.pack()
+        self.add_list_button = tk.Button(self.przyciski_frame, text="Dodaj listę", width=15, command=self.dodaj_liste)
+        self.add_list_button.grid(row=0, column=0, padx=5, pady=5)
 
-        self.delete_list_button = tk.Button(root, text="Usuń listę", command=self.usun_liste)
-        self.delete_list_button.pack()
+        self.delete_list_button = tk.Button(self.przyciski_frame, text="Usuń listę", width=15, command=self.usun_liste)
+        self.delete_list_button.grid(row=0, column=1, padx=5, pady=5)
 
-        self.search_button = tk.Button(root, text="Szukaj listy", command=self.szukaj_listy)
-        self.search_button.pack()
+        self.search_button = tk.Button(self.przyciski_frame, text="Szukaj listy", width=15, command=self.szukaj_listy)
+        self.search_button.grid(row=1, column=0, padx=5, pady=5)
 
-        self.save_button = tk.Button(root, text="Zapisz do pliku", command=self.zapisz_do_pliku)
-        self.save_button.pack()
+        self.save_button = tk.Button(self.przyciski_frame, text="Zapisz do pliku", width=15, command=self.zapisz_do_pliku)
+        self.save_button.grid(row=1, column=1, padx=5, pady=5)
 
-        self.listbox = tk.Listbox(root)
-        self.listbox.pack()
-        self.listbox.bind('<Double-1>', self.edytuj_lub_usun_liste)
+        self.listbox = tk.Listbox(root, font=("Arial", 12), height=15, bg="white", selectbackground="#c0d6e4")
+        self.listbox.pack(pady=10, fill=tk.BOTH, expand=True, padx=10)
+        self.listbox.bind('<Double-1>', self.wyswielt_i_edytuj_liste)
 
         self.wczytaj_liste()
         self.odswiez_liste()
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-        # Funkcjonalności (funkcje listy zakupów)
+        # Funkcjonalności
 
-    def dodaj_liste(self):          #możemy zrobić wyskakujące okienko zamiast paska na górze
+    def dodaj_liste(self):
+        self.root.resizable(False, False)
         tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
+        if tytul is None:
+            return
         while not tytul:
             messagebox.showwarning("Błąd", "Podaj tytuł listy")
             tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
+            if tytul is None:
+                return
 
         if tytul in self.listy:
             messagebox.showwarning("Błąd", "Lista o tym tytule już istnieje")
             tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
+            if tytul is None:
+                return
 
         pozycje = simpledialog.askstring("Pozycje", "Wprowadź pozycje oddzielone przecinkami")
         if pozycje:
@@ -57,6 +73,7 @@ class AplikacjaListaZakupow:
     def usun_liste(self):
         wybor = self.listbox.curselection()
         if not wybor:
+            messagebox.showwarning("Błąd", "Nie wybrano listy")
             return
         tytul = self.listbox.get(wybor)
         del self.listy[tytul]
@@ -64,6 +81,8 @@ class AplikacjaListaZakupow:
 
     def szukaj_listy(self):         #to możemy poprawić żeby actually szukało
         nazwa = simpledialog.askstring("Szukaj", "Podaj nazwę listy")
+        if nazwa is None:
+            return
         if nazwa in self.listy:
             pozycje = self.listy[nazwa]
             messagebox.showinfo(f"Lista: {nazwa}", "\n".join(pozycje))
@@ -78,20 +97,17 @@ class AplikacjaListaZakupow:
                     f.write(f"{tytul}:{','.join(pozycje)}\n")
             messagebox.showinfo("Zapisano", f"Zapisano do {sciezka}")
 
-    def edytuj_lub_usun_liste(self, event):     #to należy zmienić żeby nie usuwało
+    def wyswielt_i_edytuj_liste(self, event):
         wybor = self.listbox.curselection()
         if not wybor:
             return
         tytul = self.listbox.get(wybor)
 
-        akcja = messagebox.askquestion("Edycja lub usunięcie", "Czy chcesz edytować tę listę? (Nie = usuń)")
-        if akcja == 'yes':
-            nowe_pozycje = simpledialog.askstring("Edytuj pozycje", "Nowe pozycje oddzielone przecinkami", 
-                initialvalue=", ".join(self.listy[tytul]))
-            if nowe_pozycje:
-                self.listy[tytul] = [p.strip() for p in nowe_pozycje.split(',')]
-        else:
-            del self.listy[tytul]
+        nowe_pozycje = simpledialog.askstring(tytul, "Pozycje", 
+            initialvalue=", ".join(self.listy[tytul]))
+        if nowe_pozycje:
+            self.listy[tytul] = [p.strip() for p in nowe_pozycje.split(',')]
+
         self.odswiez_liste()
 
     def odswiez_liste(self):
@@ -118,5 +134,5 @@ class AplikacjaListaZakupow:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = AplikacjaListaZakupow(root)
+    AplikacjaListaZakupow(root)
     root.mainloop()
