@@ -1,7 +1,7 @@
 #Budujemy na tym pliku, tu działa autozapis do .txt
 
 import tkinter as tk
-from tkinter import messagebox, simpledialog, filedialog
+from tkinter import messagebox, simpledialog, filedialog, Toplevel
 import os
 
 # Plik do automatycznego zapisu
@@ -65,10 +65,13 @@ class AplikacjaListaZakupow:
             if tytul is None:
                 return
 
+        self.listy[tytul] = {}
+        self.odswiez_liste()
         pozycje = simpledialog.askstring("Pozycje", "Wprowadź pozycje oddzielone przecinkami")
         if pozycje:
             self.listy[tytul] = [p.strip() for p in pozycje.split(',')]
             self.odswiez_liste()
+        # self.wyswielt_i_edytuj_liste()
 
     def usun_liste(self):
         wybor = self.listbox.curselection()
@@ -103,12 +106,47 @@ class AplikacjaListaZakupow:
             return
         tytul = self.listbox.get(wybor)
 
-        nowe_pozycje = simpledialog.askstring(tytul, "Pozycje", 
-            initialvalue=", ".join(self.listy[tytul]))
-        if nowe_pozycje:
-            self.listy[tytul] = [p.strip() for p in nowe_pozycje.split(',')]
+        okno = Toplevel(self.root)
+        okno.title(tytul)
+        okno.resizable(False, False)
 
-        self.odswiez_liste()
+        lista = tk.Listbox(okno, selectmode=tk.MULTIPLE, width=50)
+        lista.pack(padx=10, pady=10)
+
+        for pozycja in self.listy[tytul]:
+            lista.insert(tk.END, pozycja)
+
+        def zapisz():
+            nowe = lista.get(0, tk.END)
+            self.listy[tytul] = [p.strip() for p in nowe if p.strip()]
+            self.odswiez_liste()
+            okno.destroy()
+
+        def dodaj():
+            nowa = simpledialog.askstring("Dodaj pozycję", "Wpisz nową pozycję:", parent=okno)
+            if nowa:
+                lista.insert(tk.END, nowa.strip())
+
+        def usun():
+            zaznaczone = list(lista.curselection())
+            if not zaznaczone:
+                return
+
+            for i in reversed(zaznaczone):
+                lista.delete(i)
+
+            # Automatycznie zaznacz kolejną możliwą pozycję
+            if lista.size() > 0:
+                next_index = min(zaznaczone[0], lista.size() - 1)
+                lista.select_set(next_index)
+                lista.activate(next_index)
+
+        przyciski = tk.Frame(okno)
+        przyciski.pack(pady=5)
+
+        tk.Button(przyciski, text="Dodaj", command=dodaj).pack(side=tk.LEFT, padx=5)
+        tk.Button(przyciski, text="Usuń zaznaczone", command=usun).pack(side=tk.LEFT, padx=5)
+        tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz).pack(side=tk.LEFT, padx=5)
 
     def odswiez_liste(self):
         self.listbox.delete(0, tk.END)
