@@ -39,7 +39,7 @@ class AplikacjaListaZakupow:
 
         self.listbox = tk.Listbox(root, font=("Arial", 12), height=15, bg="white", selectbackground="#c0d6e4")
         self.listbox.pack(pady=10, fill=tk.BOTH, expand=True, padx=10)
-        self.listbox.bind('<Double-1>', self.wyswielt_i_edytuj_liste)
+        self.listbox.bind('<Double-1>', lambda event: self.wyswielt_i_edytuj_liste(event))
 
         self.wczytaj_liste()
         self.odswiez_liste()
@@ -65,22 +65,23 @@ class AplikacjaListaZakupow:
             if tytul is None:
                 return
 
-        self.listy[tytul] = {}
+        self.listy[tytul] = []
         self.odswiez_liste()
-        pozycje = simpledialog.askstring("Pozycje", "Wprowadź pozycje oddzielone przecinkami")
-        if pozycje:
-            self.listy[tytul] = [p.strip() for p in pozycje.split(',')]
-            self.odswiez_liste()
-        # self.wyswielt_i_edytuj_liste()
+        self.wyswielt_i_edytuj_liste(None, tytul)
 
     def usun_liste(self):
         wybor = self.listbox.curselection()
         if not wybor:
-            messagebox.showwarning("Błąd", "Nie wybrano listy")
             return
-        tytul = self.listbox.get(wybor)
+        indeks = wybor[0]
+        tytul = self.listbox.get(indeks)
         del self.listy[tytul]
         self.odswiez_liste()
+
+        if self.listbox.size() > 0:
+            nastepny_wybor = min(indeks, self.listbox.size() - 1)
+            self.listbox.select_set(nastepny_wybor)
+            self.listbox.activate(nastepny_wybor)
 
     def szukaj_listy(self):         #to możemy poprawić żeby actually szukało
         nazwa = simpledialog.askstring("Szukaj", "Podaj nazwę listy")
@@ -100,14 +101,17 @@ class AplikacjaListaZakupow:
                     f.write(f"{tytul}:{','.join(pozycje)}\n")
             messagebox.showinfo("Zapisano", f"Zapisano do {sciezka}")
 
-    def wyswielt_i_edytuj_liste(self, event):
-        wybor = self.listbox.curselection()
-        if not wybor:
+    def wyswielt_i_edytuj_liste(self, event=None, tytul=None):
+        if event:
+            wybor = self.listbox.curselection()
+            if not wybor:
+                return
+            tytul = self.listbox.get(wybor)
+        if tytul is None:
             return
-        tytul = self.listbox.get(wybor)
 
         okno = Toplevel(self.root)
-        okno.title(tytul)
+        okno.title(f"Edytuj: {tytul}")
         okno.resizable(False, False)
 
         lista = tk.Listbox(okno, selectmode=tk.MULTIPLE, width=50)
@@ -131,15 +135,12 @@ class AplikacjaListaZakupow:
             zaznaczone = list(lista.curselection())
             if not zaznaczone:
                 return
-
             for i in reversed(zaznaczone):
                 lista.delete(i)
-
-            # Automatycznie zaznacz kolejną możliwą pozycję
             if lista.size() > 0:
-                next_index = min(zaznaczone[0], lista.size() - 1)
-                lista.select_set(next_index)
-                lista.activate(next_index)
+                nastepny_wybor = min(zaznaczone[0], lista.size() - 1)
+                lista.select_set(nastepny_wybor)
+                lista.activate(nastepny_wybor)
 
         przyciski = tk.Frame(okno)
         przyciski.pack(pady=5)
@@ -147,6 +148,7 @@ class AplikacjaListaZakupow:
         tk.Button(przyciski, text="Dodaj", command=dodaj).pack(side=tk.LEFT, padx=5)
         tk.Button(przyciski, text="Usuń zaznaczone", command=usun).pack(side=tk.LEFT, padx=5)
         tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz).pack(side=tk.LEFT, padx=5)
+
 
     def odswiez_liste(self):
         self.listbox.delete(0, tk.END)
