@@ -52,13 +52,51 @@ class AplikacjaListaZakupow:
             self.listy[tytul] = [p.strip() for p in pozycje.split(',')]
             self.odswiez_liste()
 
-    def szukaj_listy(self):         #to możemy poprawić żeby actually szukało
-        nazwa = simpledialog.askstring("Szukaj", "Podaj nazwę listy")
-        if nazwa in self.listy:
-            pozycje = self.listy[nazwa]
-            messagebox.showinfo(f"Lista: {nazwa}", "\n".join(pozycje))
-        else:
-            messagebox.showwarning("Nie znaleziono", "Brak listy o podanej nazwie")
+    def szukaj_listy(self):
+        zapytanie = simpledialog.askstring("Szukaj", "Wpisz co najmniej 3 znaki (nazwa lub pozycja)")
+        if not zapytanie or len(zapytanie.strip()) < 3:
+            messagebox.showwarning("Błąd", "Wprowadź co najmniej 3 znaki.")
+            return
+
+        zapytanie = zapytanie.lower().strip()
+        wyniki = []
+
+        for tytul, pozycje in self.listy.items():
+            if zapytanie in tytul.lower() or any(zapytanie in p.lower() for p in pozycje):
+                wyniki.append(tytul)
+
+        if not wyniki:
+            messagebox.showinfo("Brak wyników", "Nie znaleziono pasujących list.")
+            return
+
+        # Nowe okno z wynikami
+        wynik_okno = tk.Toplevel(self.root)
+        wynik_okno.title("Wyniki wyszukiwania")
+
+        wynik_listbox = tk.Listbox(wynik_okno, width=50)
+        wynik_listbox.pack(padx=10, pady=10)
+        for tytul in wyniki:
+            wynik_listbox.insert(tk.END, tytul)
+
+        def edytuj_po_kliknieciu(event):
+            wybor = wynik_listbox.curselection()
+            if not wybor:
+                return
+            tytul = wynik_listbox.get(wybor)
+
+            nowe_pozycje = simpledialog.askstring(
+                "Edytuj pozycje",
+                "Nowe pozycje oddzielone przecinkami",
+                initialvalue=", ".join(self.listy[tytul])
+            )
+            if nowe_pozycje is not None:
+                self.listy[tytul] = [p.strip() for p in nowe_pozycje.split(',')]
+                self.odswiez_liste()
+                messagebox.showinfo("Zmieniono", f"Zaktualizowano listę: {tytul}")
+                wynik_okno.destroy()
+
+        wynik_listbox.bind("<Double-1>", edytuj_po_kliknieciu)
+
 
     def zapisz_do_pliku(self):
         sciezka = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Pliki tekstowe", "*.txt")])
