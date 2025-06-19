@@ -11,30 +11,55 @@ class AplikacjaListaZakupow:
     def __init__(self, root):
         self.root = root
         self.root.title("Lista Zakupów")
-        self.root.geometry("400x500")
         self.root.resizable(False, False)
-        self.root.configure(bg="#f0f0f0")
+        self.root.configure(bg="#f0f4f8")  # już jedno ustawienie wystarczy
+        # Wyśrodkowanie okna
+        okno_szerokosc = 400
+        okno_wysokosc = 500
+
+        # Pobierz rozmiar ekranu
+        ekran_szerokosc = self.root.winfo_screenwidth()
+        ekran_wysokosc = self.root.winfo_screenheight()
+
+        # Oblicz współrzędne do wyśrodkowania
+        x = (ekran_szerokosc // 2) - (okno_szerokosc // 2)
+        y = (ekran_wysokosc // 2) - (okno_wysokosc // 2)
+
+        # Ustawienie pozycji okna
+        self.root.geometry(f"{okno_szerokosc}x{okno_wysokosc}+{x}+{y}")
 
         self.listy = {}
 
         # Nagłówek
-        self.label = tk.Label(root, text="Twoje Listy Zakupów", font=("Arial", 16, "bold"), bg="#f0f0f0")
+        self.label = tk.Label(root, text="Twoje Listy Zakupów", font=("Arial", 16, "bold"), bg="#f0f4f8")
         self.label.pack(pady=10)
 
-        # Interfejs użytkownika
-        self.przyciski_frame = tk.Frame(root, bg="#f0f0f0")
+        # Interfejs użytkownika (jeden frame do gridowania przycisków)
+        self.przyciski_frame = tk.Frame(root, bg="#f0f4f8")
         self.przyciski_frame.pack(pady=5)
 
-        self.add_list_button = tk.Button(self.przyciski_frame, text="Dodaj listę", width=15, command=self.dodaj_liste)
+        self.add_list_button = tk.Button(
+            self.przyciski_frame, text="Dodaj listę", width=15, command=self.dodaj_liste,
+            bg="#4CAF50", fg="white", activebackground="#45A049", relief=tk.FLAT
+        )
         self.add_list_button.grid(row=0, column=0, padx=5, pady=5)
 
-        self.delete_list_button = tk.Button(self.przyciski_frame, text="Usuń listę", width=15, command=self.usun_liste)
+        self.delete_list_button = tk.Button(
+            self.przyciski_frame, text="Usuń listę", width=15, command=self.usun_liste,
+            bg="#f44336", fg="white", activebackground="#da190b", relief=tk.FLAT
+        )
         self.delete_list_button.grid(row=0, column=1, padx=5, pady=5)
 
-        self.search_button = tk.Button(self.przyciski_frame, text="Szukaj listy", width=15, command=self.szukaj_listy)
+        self.search_button = tk.Button(
+            self.przyciski_frame, text="Szukaj listy", width=15, command=self.szukaj_listy,
+            bg="#2196F3", fg="white", activebackground="#0b7dda", relief=tk.FLAT
+        )
         self.search_button.grid(row=1, column=0, padx=5, pady=5)
 
-        self.save_button = tk.Button(self.przyciski_frame, text="Zapisz do pliku", width=15, command=self.zapisz_do_pliku)
+        self.save_button = tk.Button(
+            self.przyciski_frame, text="Zapisz do pliku", width=15, command=self.zapisz_do_pliku,
+            bg="#9C27B0", fg="white", activebackground="#7b1fa2", relief=tk.FLAT
+        )
         self.save_button.grid(row=1, column=1, padx=5, pady=5)
 
         self.listbox = tk.Listbox(root, font=("Arial", 12), height=15, bg="white", selectbackground="#c0d6e4")
@@ -43,12 +68,11 @@ class AplikacjaListaZakupow:
         self.listbox.bind('<Double-1>', lambda event: self.wyswielt_i_edytuj_liste(event))
         self.listbox.bind('<space>', lambda event: self.wyswielt_i_edytuj_liste(event))
 
-        # self.listbox.bind('<Key>', lambda event: self.debug_klawiszy(event))
-
         self.wczytaj_liste()
         self.odswiez_liste()
 
         self.root.protocol("WM_DELETE_WINDOW", self.zamknij_x)
+
 
     # Funkcjonalności
 
