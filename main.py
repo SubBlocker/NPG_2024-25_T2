@@ -15,7 +15,7 @@ class AplikacjaListaZakupow:
         self.root.resizable(False, False)
         self.root.configure(bg="#f0f0f0")
 
-        self.listy = {}  # Słownik przechowujący listy zakupów
+        self.listy = {}
 
         # Nagłówek
         self.label = tk.Label(root, text="Twoje Listy Zakupów", font=("Arial", 16, "bold"), bg="#f0f0f0")
@@ -39,14 +39,21 @@ class AplikacjaListaZakupow:
 
         self.listbox = tk.Listbox(root, font=("Arial", 12), height=15, bg="white", selectbackground="#c0d6e4")
         self.listbox.pack(pady=10, fill=tk.BOTH, expand=True, padx=10)
+
         self.listbox.bind('<Double-1>', lambda event: self.wyswielt_i_edytuj_liste(event))
+        self.listbox.bind('<space>', lambda event: self.wyswielt_i_edytuj_liste(event))
+
+        # self.listbox.bind('<Key>', lambda event: self.debug_klawiszy(event))
 
         self.wczytaj_liste()
         self.odswiez_liste()
 
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.root.protocol("WM_DELETE_WINDOW", self.zamknij_x)
 
-        # Funkcjonalności
+    # Funkcjonalności
+
+    # def debug_klawiszy(self, event):
+    #     print(f"Naciśnięto: {event.keysym}")
 
     def dodaj_liste(self):
         self.root.resizable(False, False)
@@ -70,6 +77,7 @@ class AplikacjaListaZakupow:
         self.wyswielt_i_edytuj_liste(None, tytul)
 
     def usun_liste(self):
+        # print("usun_liste_ok")
         wybor = self.listbox.curselection()
         if not wybor:
             return
@@ -111,10 +119,13 @@ class AplikacjaListaZakupow:
             return
 
         okno = Toplevel(self.root)
-        okno.title(f"Edytuj: {tytul}")
+        okno.title(f"Lista: {tytul}")
         okno.resizable(False, False)
+        okno.focus_force()
 
-        lista = tk.Listbox(okno, selectmode=tk.MULTIPLE, width=50)
+        oryginalne = list(self.listy[tytul])
+
+        lista = tk.Listbox(okno, selectmode=tk.SINGLE, width=50)
         lista.pack(padx=10, pady=10)
 
         for pozycja in self.listy[tytul]:
@@ -127,27 +138,40 @@ class AplikacjaListaZakupow:
             okno.destroy()
 
         def dodaj():
-            nowa = simpledialog.askstring("Dodaj pozycję", "Wpisz nową pozycję:", parent=okno)
+            nowa = simpledialog.askstring("Dodaj pozycje", "Wpisz nowe pozycje  po przecinku:", parent=okno)
             if nowa:
-                lista.insert(tk.END, nowa.strip())
+                for pozycja in nowa.split(','):
+                    p = pozycja.strip()
+                    if p:
+                        lista.insert(tk.END, p)
 
         def usun():
-            zaznaczone = list(lista.curselection())
-            if not zaznaczone:
+            # print("usun_ok")
+            zaznaczony = lista.curselection()
+            if not zaznaczony:
                 return
-            for i in reversed(zaznaczone):
-                lista.delete(i)
+            lista.delete(zaznaczony[0])
             if lista.size() > 0:
-                nastepny_wybor = min(zaznaczone[0], lista.size() - 1)
-                lista.select_set(nastepny_wybor)
-                lista.activate(nastepny_wybor)
+                nowy = min(zaznaczony[0], lista.size() - 1)
+                lista.select_set(nowy)
+                lista.activate(nowy)
+
+        def zamknij_x():
+            aktualne = [lista.get(i) for i in range(lista.size())]
+            if aktualne != oryginalne:
+                if messagebox.askyesno("Niezapisane zmiany", "Masz niezapisane zmiany. Czy chcesz je zapisać?"):
+                    zapisz()
+            okno.destroy()
+
 
         przyciski = tk.Frame(okno)
         przyciski.pack(pady=5)
 
         tk.Button(przyciski, text="Dodaj", command=dodaj).pack(side=tk.LEFT, padx=5)
-        tk.Button(przyciski, text="Usuń zaznaczone", command=usun).pack(side=tk.LEFT, padx=5)
+        tk.Button(przyciski, text="Usuń zaznaczony", command=usun).pack(side=tk.LEFT, padx=5)
         tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz).pack(side=tk.LEFT, padx=5)
+
+        okno.protocol("WM_DELETE_WINDOW", zamknij_x)
 
 
     def odswiez_liste(self):
@@ -168,7 +192,7 @@ class AplikacjaListaZakupow:
                         tytul, pozycje = linia.strip().split(':', 1)
                         self.listy[tytul] = [p.strip() for p in pozycje.split(',') if p.strip()]
 
-    def on_close(self):
+    def zamknij_x(self):
         self.zapisz_liste()
         self.root.destroy()
 
