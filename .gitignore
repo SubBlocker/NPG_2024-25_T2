@@ -17,5 +17,10 @@ env/
 .DS_Store
 Thumbs.db
 
+# Ignoruj pliki konfiguracyjne PyInstaller
+build/
+_internal/
+*.spec
+
 # Ignoruj listy zapisywane przez program
 *.txt
