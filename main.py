@@ -13,20 +13,7 @@ class AplikacjaListaZakupow:
         self.root.title("Lista Zakupów")
         self.root.resizable(False, False)
         self.root.configure(bg="#f0f4f8")  # już jedno ustawienie wystarczy
-        # Wyśrodkowanie okna
-        okno_szerokosc = 400
-        okno_wysokosc = 500
-
-        # Pobierz rozmiar ekranu
-        ekran_szerokosc = self.root.winfo_screenwidth()
-        ekran_wysokosc = self.root.winfo_screenheight()
-
-        # Oblicz współrzędne do wyśrodkowania
-        x = (ekran_szerokosc // 2) - (okno_szerokosc // 2)
-        y = (ekran_wysokosc // 2) - (okno_wysokosc // 2)
-
-        # Ustawienie pozycji okna
-        self.root.geometry(f"{okno_szerokosc}x{okno_wysokosc}+{x}+{y}")
+        self.ustaw_okno(400, 500, 0, 0, self.root) # ustawia okno 
 
         self.listy = {}
 
@@ -71,13 +58,10 @@ class AplikacjaListaZakupow:
         self.wczytaj_liste()
         self.odswiez_liste()
 
-        self.root.protocol("WM_DELETE_WINDOW", self.zamknij_x)
+        self.root.protocol("WM_DELETE_WINDOW", self.zamknij_okno)
 
 
     # Funkcjonalności
-
-    # def debug_klawiszy(self, event):
-    #     print(f"Naciśnięto: {event.keysym}")
 
     def dodaj_liste(self):
         self.root.resizable(False, False)
@@ -163,8 +147,7 @@ class AplikacjaListaZakupow:
                 lista_skladnikow.insert(tk.END, item)
 
             def edytuj():
-                nowe_pozycje = simpledialog.askstring("Edytuj pozycje", "Nowe pozycje oddzielone przecinkami",
-                                                       initialvalue=", ".join(self.listy[tytul]))
+                nowe_pozycje = simpledialog.askstring("Edytuj pozycje", "Nowe pozycje oddzielone przecinkami", initialvalue=", ".join(self.listy[tytul]))
                 if nowe_pozycje:
                     self.listy[tytul] = [p.strip() for p in nowe_pozycje.split(',')]
                     self.odswiez_liste()
@@ -200,6 +183,7 @@ class AplikacjaListaZakupow:
         okno = Toplevel(self.root)
         okno.title(f"Lista: {tytul}")
         okno.resizable(False, False)
+        self.ustaw_okno(350, 300, 0, 100, okno)
         okno.focus_force()
 
         oryginalne = list(self.listy[tytul])
@@ -225,7 +209,6 @@ class AplikacjaListaZakupow:
                         lista.insert(tk.END, p)
 
         def usun():
-            # print("usun_ok")
             zaznaczony = lista.curselection()
             if not zaznaczony:
                 return
@@ -235,7 +218,7 @@ class AplikacjaListaZakupow:
                 lista.select_set(nowy)
                 lista.activate(nowy)
 
-        def zamknij_x():
+        def zamknij_okno():
             aktualne = [lista.get(i) for i in range(lista.size())]
             if aktualne != oryginalne:
                 if messagebox.askyesno("Niezapisane zmiany", "Masz niezapisane zmiany. Czy chcesz je zapisać?"):
@@ -250,7 +233,7 @@ class AplikacjaListaZakupow:
         tk.Button(przyciski, text="Usuń zaznaczony", command=usun).pack(side=tk.LEFT, padx=5)
         tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz).pack(side=tk.LEFT, padx=5)
 
-        okno.protocol("WM_DELETE_WINDOW", zamknij_x)
+        okno.protocol("WM_DELETE_WINDOW", zamknij_okno)
 
 
     def odswiez_liste(self):
@@ -271,7 +254,14 @@ class AplikacjaListaZakupow:
                         tytul, pozycje = linia.strip().split(':', 1)
                         self.listy[tytul] = [p.strip() for p in pozycje.split(',') if p.strip()]
 
-    def zamknij_x(self):
+    def ustaw_okno(self, okno_szerokosc: int, okno_wysokosc: int, x: int, y: int, okno):
+        x += (okno.winfo_screenwidth() // 2) - (okno_szerokosc // 2)
+        y += (okno.winfo_screenheight() // 2) - (okno_wysokosc // 2)
+
+        okno.geometry(f"{okno_szerokosc}x{okno_wysokosc}+{x}+{y}")
+
+
+    def zamknij_okno(self):
         self.zapisz_liste()
         self.root.destroy()
 
