@@ -180,12 +180,12 @@ class AplikacjaListaZakupow:
         self.edycje_okien[tytul] = okno
         okno.title(f"Lista: {tytul}")
         okno.resizable(False, False)
-        self.ustaw_okno(300, 225, 0, 100, okno)
+        self.ustaw_okno(370, 225, 0, 100, okno)
         okno.focus_force()
 
         oryginalne = list(self.listy[tytul])
 
-        lista = tk.Listbox(okno, selectmode=tk.SINGLE, width=50)
+        lista = tk.Listbox(okno, selectmode=tk.SINGLE, width=60)
         lista.pack(padx=10, pady=10)
 
         for pozycja in self.listy[tytul]:
@@ -215,7 +215,23 @@ class AplikacjaListaZakupow:
                 lista.select_set(nowy)
                 lista.activate(nowy)
 
-        def zamknij_okno():
+        def zmien_nazwe():
+            nonlocal tytul
+            nowa = simpledialog.askstring("Zmień nazwę listy", "Wprowadź nową nazwę:", initialvalue=tytul, parent=okno)
+            if not nowa:
+                return
+            nowa = nowa.strip()
+            if nowa in self.listy:
+                messagebox.showerror("Błąd", "Lista o takiej nazwie już istnieje.")
+                return
+
+            self.listy[nowa] = self.listy.pop(tytul)
+            self.edycje_okien[nowa] = self.edycje_okien.pop(tytul)
+            tytul = nowa
+            okno.title(f"Lista: {tytul}")
+            self.odswiez_liste()
+
+        def zamknij():
             aktualne = [lista.get(i) for i in range(lista.size())]
             if aktualne != oryginalne:
                 if messagebox.askyesno("Niezapisane zmiany", "Masz niezapisane zmiany. Czy chcesz je zapisać?"):
@@ -228,10 +244,14 @@ class AplikacjaListaZakupow:
         przyciski.pack(pady=5)
 
         tk.Button(przyciski, text="Dodaj", command=dodaj, bg="#4CAF50", fg="white", activebackground="#45A049", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
+
         tk.Button(przyciski, text="Usuń zaznaczony", command=usun, bg="#f44336", fg="white", activebackground="#da190b", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(przyciski, text="Zmień nazwę", command=zmien_nazwe, bg="#2196F3", fg="white", activebackground="#0b7dda", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
+
         tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz, bg="#9C27B0", fg="white", activebackground="#7b1fa2", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
 
-        okno.protocol("WM_DELETE_WINDOW", zamknij_okno)
+        okno.protocol("WM_DELETE_WINDOW", zamknij)
 
     def odswiez_liste(self):
         self.listbox.delete(0, tk.END)
