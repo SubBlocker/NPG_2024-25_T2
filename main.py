@@ -58,7 +58,7 @@ class AplikacjaListaZakupow:
 
         self.export_button = tk.Button(
             self.przyciski_frame, text="Eksportuj do PDF", width=15, command=self.eksportuj_do_pdf,
-            bg="#9E9E9E", fg="white", activebackground="#757575", relief=tk.FLAT
+            bg="#3F51B5", fg="white", activebackground="#303F9F", relief=tk.FLAT
         )
         self.export_button.grid(row=1, column=1, padx=5, pady=5)
 
@@ -152,7 +152,7 @@ class AplikacjaListaZakupow:
         wynik_listbox.bind("<Double-1>", lambda event: self.wyswielt_i_edytuj_liste(event))
         wynik_listbox.bind("<space>", lambda event: self.wyswielt_i_edytuj_liste(event))
 
-        zamknij_btn = tk.Button(wynik_okno, text="Zamknij", command=wynik_okno.destroy, bg="#f44336", fg="white", activebackground="#da190b", relief=tk.FLAT)
+        zamknij_btn = tk.Button(wynik_okno, text="Zamknij wyszukiwanie", width=18, command=wynik_okno.destroy, bg="#607D8B", fg="white", activebackground="#455A64", relief=tk.FLAT)
         zamknij_btn.pack(pady=(0, 10))
 
     def zapisz_do_pliku(self):
@@ -185,7 +185,7 @@ class AplikacjaListaZakupow:
         self.edycje_okien[tytul] = okno
         okno.title(f"Lista: {tytul}")
         okno.resizable(False, False)
-        self.ustaw_okno(370, 225, 0, 100, okno)
+        self.ustaw_okno(370, 265, 0, 100, okno)
         okno.focus_force()
 
         oryginalne = list(self.listy[tytul])
@@ -245,18 +245,18 @@ class AplikacjaListaZakupow:
             okno.destroy()
 
 
-        przyciski = tk.Frame(okno)
-        przyciski.pack(pady=5)
+        przyciski = tk.Frame(okno, bg="#f0f4f8")
+        przyciski.pack(pady=(0, 2))
 
-        tk.Button(przyciski, text="Dodaj", command=dodaj, bg="#4CAF50", fg="white", activebackground="#45A049", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
+        btn_style = dict(width=18, fg="white", relief=tk.FLAT)
 
-        tk.Button(przyciski, text="Usuń zaznaczony", command=usun, bg="#f44336", fg="white", activebackground="#da190b", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
+        tk.Button(przyciski, text="Dodaj element", command=dodaj, bg="#4CAF50", activebackground="#45A049", **btn_style).grid(row=0, column=0, padx=5, pady=5)
 
-        tk.Button(przyciski, text="Zmień nazwę", command=zmien_nazwe, bg="#2196F3", fg="white", activebackground="#0b7dda", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
+        tk.Button(przyciski, text="Usuń zaznaczony", command=usun, bg="#f44336", activebackground="#da190b", **btn_style).grid(row=0, column=1, padx=5, pady=5)
 
-        tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz, bg="#9C27B0", fg="white", activebackground="#7b1fa2", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
+        tk.Button(przyciski, text="Zmień nazwę", command=zmien_nazwe, bg="#2196F3", activebackground="#0b7dda", **btn_style).grid(row=1, column=0, padx=5, pady=5)
 
-        okno.protocol("WM_DELETE_WINDOW", zamknij)
+        tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz, bg="#9C27B0", activebackground="#7b1fa2", **btn_style).grid(row=1, column=1, padx=5, pady=5)
 
     def odswiez_liste(self):
         self.listbox.delete(0, tk.END)
