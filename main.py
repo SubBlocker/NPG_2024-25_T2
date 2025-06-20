@@ -2,10 +2,12 @@
 
 import tkinter as tk
 from tkinter import messagebox, simpledialog, filedialog, Toplevel
-import os
-from reportlab.lib.pagesizes import A4 #trzeba miec reportlaba btw
-from reportlab.pdfgen import canvas
 from tkinter import filedialog, messagebox
+from reportlab.lib.pagesizes import A4          # type: ignore  (trzeba miec reportlaba btw)
+from reportlab.pdfgen import canvas             # type: ignore
+from reportlab.pdfbase import pdfmetrics        # type: ignore
+from reportlab.pdfbase.ttfonts import TTFont    # type: ignore
+import os
 
 # Plik do automatycznego zapisu
 PLIK = "listy_zakupow.txt"
@@ -54,8 +56,8 @@ class AplikacjaListaZakupow:
         )
         self.save_button.grid(row=1, column=0, padx=5, pady=5)
 
-        self.export_button = tk.Button(          #tu wywołać odpowiedną funkcję
-            self.przyciski_frame, text="Eksportuj do PDF", width=15, command=lambda: None,
+        self.export_button = tk.Button(
+            self.przyciski_frame, text="Eksportuj do PDF", width=15, command=self.eksportuj_do_pdf,
             bg="#9E9E9E", fg="white", activebackground="#757575", relief=tk.FLAT
         )
         self.export_button.grid(row=1, column=1, padx=5, pady=5)
@@ -76,9 +78,6 @@ class AplikacjaListaZakupow:
         self.odswiez_liste()
 
         self.root.protocol("WM_DELETE_WINDOW", self.zamknij_okno)
-
-        self.export_pdf_button = tk.Button(root, text="Eksportuj do PDF", command=self.eksportuj_do_pdf) #to do dodatkowej f
-        self.export_pdf_button.pack()
 
 
     # Funkcjonalności
@@ -144,7 +143,7 @@ class AplikacjaListaZakupow:
         self.ustaw_okno(400, 250, 0, 80, wynik_okno)
         wynik_okno.focus_force()
 
-        wynik_listbox = tk.Listbox(wynik_okno, width=50, height=10, font=("Helvetica", 12))
+        wynik_listbox = tk.Listbox(wynik_okno, width=50, height=10, font=("Arial", 12))
         wynik_listbox.pack(padx=10, pady=10)
 
         for tytul in wyniki:
@@ -288,53 +287,55 @@ class AplikacjaListaZakupow:
         self.root.destroy()
 
     def eksportuj_do_pdf(self):
-    if not self.listy:
-        messagebox.showwarning("Brak list", "Brak list zakupów do wyeksportowania!")
-        return
+        if not self.listy:
+            messagebox.showwarning("Brak list", "Brak list zakupów do wyeksportowania!")
+            return
 
-    sciezka = filedialog.asksaveasfilename(
-        defaultextension=".pdf",
-        filetypes=[("Pliki PDF", "*.pdf")],
-        title="Zapisz listę zakupów jako PDF"
-    )
-    if not sciezka:
-        return  # użytkownik anulował zapis
+        sciezka = filedialog.asksaveasfilename(
+            defaultextension=".pdf",
+            filetypes=[("Pliki PDF", "*.pdf")],
+            title="Zapisz listę zakupów jako PDF"
+        )
+        if not sciezka:
+            return  # użytkownik anulował zapis
 
-    try:
-        c = canvas.Canvas(sciezka, pagesize=A4)
-        szerokosc, wysokosc = A4
+        try:
+            pdfmetrics.registerFont(TTFont("Arial", "Arial.ttf"))
+            c = canvas.Canvas(sciezka, pagesize=A4)
+            szerokosc, wysokosc = A4
+            nazwa = os.path.splitext(os.path.basename(sciezka))[0]
+            y = wysokosc - 50
 
-        y = wysokosc - 50
-        c.setFont("Helvetica-Bold", 16)
-        c.drawString(50, y, "Lista Zakupów")
-        y -= 40
+            c.setFont("Arial", 16)
+            c.drawString(50, y, nazwa)
+            y -= 40
 
-        c.setFont("Helvetica", 12)
-        for tytul, pozycje in self.listy.items():
-            if y < 100:
-                c.showPage()  # nowa strona PDF
-                y = wysokosc - 50
-                c.setFont("Helvetica", 12)
-
-            c.setFont("Helvetica-Bold", 14)
-            c.drawString(50, y, tytul)
-            y -= 20
-
-            c.setFont("Helvetica", 12)
-            for pozycja in pozycje:
-                c.drawString(70, y, f"- {pozycja}")
-                y -= 15
-                if y < 50:
-                    c.showPage()
+            c.setFont("Arial", 12)
+            for tytul, pozycje in self.listy.items():
+                if y < 100:
+                    c.showPage()  # nowa strona PDF
                     y = wysokosc - 50
-                    c.setFont("Helvetica", 12)
+                    c.setFont("Arial", 12)
 
-            y -= 10  # odstęp między listami
+                c.setFont("Arial", 14)
+                c.drawString(50, y, f"{tytul}:")
+                y -= 20
 
-        c.save()
-        messagebox.showinfo("Sukces", f"Lista została zapisana do pliku:\n{sciezka}")
-    except Exception as e:
-        messagebox.showerror("Błąd", f"Wystąpił błąd podczas zapisu PDF:\n{e}")
+                c.setFont("Arial", 12)
+                for pozycja in pozycje:
+                    c.drawString(70, y, f"- {pozycja}")
+                    y -= 15
+                    if y < 50:
+                        c.showPage()
+                        y = wysokosc - 50
+                        c.setFont("Arial", 12)
+
+                y -= 10  # odstęp między listami
+
+            c.save()
+            messagebox.showinfo("Sukces", f"Lista została zapisana do pliku:\n{sciezka}")
+        except Exception as e:
+            messagebox.showerror("Błąd", f"Wystąpił błąd podczas zapisu PDF:\n{e}")
 
 if __name__ == "__main__":
     root = tk.Tk()
