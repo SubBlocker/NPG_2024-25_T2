@@ -16,6 +16,8 @@ class AplikacjaListaZakupow:
         self.ustaw_okno(400, 500, 0, 0, self.root) # ustawia okno 
 
         self.listy = {}
+        self.edycje_okien = {}
+
 
         # Nagłówek
         self.label = tk.Label(root, text="Twoje Listy Zakupów", font=("Arial", 16, "bold"), bg="#f0f4f8")
@@ -41,13 +43,25 @@ class AplikacjaListaZakupow:
             self.przyciski_frame, text="Szukaj listy", width=15, command=self.szukaj_listy,
             bg="#2196F3", fg="white", activebackground="#0b7dda", relief=tk.FLAT
         )
-        self.search_button.grid(row=1, column=0, padx=5, pady=5)
+        self.search_button.grid(row=0, column=2, padx=5, pady=5)
 
         self.save_button = tk.Button(
             self.przyciski_frame, text="Zapisz do pliku", width=15, command=self.zapisz_do_pliku,
             bg="#9C27B0", fg="white", activebackground="#7b1fa2", relief=tk.FLAT
         )
-        self.save_button.grid(row=1, column=1, padx=5, pady=5)
+        self.save_button.grid(row=1, column=0, padx=5, pady=5)
+
+        self.export_button = tk.Button(          #tu wywołać odpowiedną funkcję
+            self.przyciski_frame, text="Eksportuj do PDF", width=15, command=lambda: None,
+            bg="#9E9E9E", fg="white", activebackground="#757575", relief=tk.FLAT
+        )
+        self.export_button.grid(row=1, column=1, padx=5, pady=5)
+
+        self.exit_button = tk.Button(
+            self.przyciski_frame, text="Zamknij aplikację", width=15, command=self.zamknij_okno,
+            bg="#607D8B", fg="white", activebackground="#455A64", relief=tk.FLAT
+        )
+        self.exit_button.grid(row=1, column=2, padx=5, pady=5)
 
         self.listbox = tk.Listbox(root, font=("Arial", 12), height=15, bg="white", selectbackground="#c0d6e4")
         self.listbox.pack(pady=10, fill=tk.BOTH, expand=True, padx=10)
@@ -72,8 +86,7 @@ class AplikacjaListaZakupow:
             tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
             if tytul is None:
                 return
-
-        if tytul in self.listy:
+        while tytul in self.listy:
             messagebox.showwarning("Błąd", "Lista o tym tytule już istnieje")
             tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
             if tytul is None:
@@ -84,7 +97,6 @@ class AplikacjaListaZakupow:
         self.wyswielt_i_edytuj_liste(None, tytul)
 
     def usun_liste(self):
-        # print("usun_liste_ok")
         wybor = self.listbox.curselection()
         if not wybor:
             return
@@ -100,6 +112,8 @@ class AplikacjaListaZakupow:
 
     def szukaj_listy(self):
         zapytanie = simpledialog.askstring("Szukaj", "Wpisz co najmniej 3 znaki (nazwa lub pozycja)")
+        if zapytanie is None:
+                return
         while len(zapytanie.strip()) < 3:
             messagebox.showwarning("Błąd", "Wprowadź co najmniej 3 znaki.")
             zapytanie = simpledialog.askstring("Szukaj", "Wpisz co najmniej 3 znaki (nazwa lub pozycja)")
@@ -122,8 +136,6 @@ class AplikacjaListaZakupow:
         wynik_okno.title(f"Wyniki wyszukiwania: {zapytanie}")
         wynik_okno.resizable(False, False)
         self.ustaw_okno(400, 250, 0, 80, wynik_okno)
-        # wynik_okno.transient(self.root)
-        # wynik_okno.grab_set()
         wynik_okno.focus_force()
 
         wynik_listbox = tk.Listbox(wynik_okno, width=50, height=10, font=("Helvetica", 12))
@@ -135,7 +147,7 @@ class AplikacjaListaZakupow:
         wynik_listbox.bind("<Double-1>", lambda event: self.wyswielt_i_edytuj_liste(event))
         wynik_listbox.bind("<space>", lambda event: self.wyswielt_i_edytuj_liste(event))
 
-        zamknij_btn = tk.Button(wynik_okno, text="Zamknij", command=wynik_okno.destroy)
+        zamknij_btn = tk.Button(wynik_okno, text="Zamknij", command=wynik_okno.destroy, bg="#f44336", fg="white", activebackground="#da190b", relief=tk.FLAT)
         zamknij_btn.pack(pady=(0, 10))
 
     def zapisz_do_pliku(self):
@@ -155,8 +167,17 @@ class AplikacjaListaZakupow:
             tytul = widget.get(wybor[0])
         if tytul is None:
             return
+        if tytul in self.edycje_okien:
+            okno = self.edycje_okien[tytul]
+            if okno.winfo_exists():
+                okno.lift()
+                okno.focus_force()
+                return
+            else:
+                self.edycje_okien.pop(tytul)
 
         okno = Toplevel(self.root)
+        self.edycje_okien[tytul] = okno
         okno.title(f"Lista: {tytul}")
         okno.resizable(False, False)
         self.ustaw_okno(300, 225, 0, 100, okno)
@@ -199,15 +220,16 @@ class AplikacjaListaZakupow:
             if aktualne != oryginalne:
                 if messagebox.askyesno("Niezapisane zmiany", "Masz niezapisane zmiany. Czy chcesz je zapisać?"):
                     zapisz()
+            self.edycje_okien.pop(tytul, None)
             okno.destroy()
 
 
         przyciski = tk.Frame(okno)
         przyciski.pack(pady=5)
 
-        tk.Button(przyciski, text="Dodaj", command=dodaj).pack(side=tk.LEFT, padx=5)
-        tk.Button(przyciski, text="Usuń zaznaczony", command=usun).pack(side=tk.LEFT, padx=5)
-        tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz).pack(side=tk.LEFT, padx=5)
+        tk.Button(przyciski, text="Dodaj", command=dodaj, bg="#4CAF50", fg="white", activebackground="#45A049", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
+        tk.Button(przyciski, text="Usuń zaznaczony", command=usun, bg="#f44336", fg="white", activebackground="#da190b", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
+        tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz, bg="#9C27B0", fg="white", activebackground="#7b1fa2", relief=tk.FLAT).pack(side=tk.LEFT, padx=5)
 
         okno.protocol("WM_DELETE_WINDOW", zamknij_okno)
 
@@ -234,7 +256,6 @@ class AplikacjaListaZakupow:
         y += (okno.winfo_screenheight() // 2) - (okno_wysokosc // 2)
 
         okno.geometry(f"{okno_szerokosc}x{okno_wysokosc}+{x}+{y}")
-
 
     def zamknij_okno(self):
         self.zapisz_liste()
