@@ -64,7 +64,6 @@ class AplikacjaListaZakupow:
     # Funkcjonalności
 
     def dodaj_liste(self):
-        self.root.resizable(False, False)
         tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
         if tytul is None:
             return
@@ -101,9 +100,11 @@ class AplikacjaListaZakupow:
 
     def szukaj_listy(self):
         zapytanie = simpledialog.askstring("Szukaj", "Wpisz co najmniej 3 znaki (nazwa lub pozycja)")
-        if not zapytanie or len(zapytanie.strip()) < 3:
+        while len(zapytanie.strip()) < 3:
             messagebox.showwarning("Błąd", "Wprowadź co najmniej 3 znaki.")
-            return
+            zapytanie = simpledialog.askstring("Szukaj", "Wpisz co najmniej 3 znaki (nazwa lub pozycja)")
+            if zapytanie is None:
+                return
 
         zapytanie = zapytanie.lower().strip()
         wyniki = []
@@ -118,7 +119,12 @@ class AplikacjaListaZakupow:
 
         # Okno z wynikami
         wynik_okno = tk.Toplevel(self.root)
-        wynik_okno.title("Wyniki wyszukiwania")
+        wynik_okno.title(f"Wyniki wyszukiwania: {zapytanie}")
+        wynik_okno.resizable(False, False)
+        self.ustaw_okno(400, 250, 0, 80, wynik_okno)
+        # wynik_okno.transient(self.root)
+        # wynik_okno.grab_set()
+        wynik_okno.focus_force()
 
         wynik_listbox = tk.Listbox(wynik_okno, width=50, height=10, font=("Helvetica", 12))
         wynik_listbox.pack(padx=10, pady=10)
@@ -126,42 +132,11 @@ class AplikacjaListaZakupow:
         for tytul in wyniki:
             wynik_listbox.insert(tk.END, tytul)
 
-        def pokaz_skladniki(event):
-            wybor = wynik_listbox.curselection()
-            if not wybor:
-                return
-            tytul = wynik_listbox.get(wybor)
-            skladniki = self.listy[tytul]
+        wynik_listbox.bind("<Double-1>", lambda event: self.wyswielt_i_edytuj_liste(event))
+        wynik_listbox.bind("<space>", lambda event: self.wyswielt_i_edytuj_liste(event))
 
-            # nowe okno z widokiem składników
-            skladnik_okno = tk.Toplevel(wynik_okno)
-            skladnik_okno.title(f"Lista: {tytul}")
-
-            label = tk.Label(skladnik_okno, text=f"Składniki listy: {tytul}", font=("Helvetica", 14, "bold"))
-            label.pack(pady=(10, 5))
-
-            lista_skladnikow = tk.Listbox(skladnik_okno, width=40, height=len(skladniki), font=("Helvetica", 12))
-            lista_skladnikow.pack(padx=10, pady=5)
-
-            for item in skladniki:
-                lista_skladnikow.insert(tk.END, item)
-
-            def edytuj():
-                nowe_pozycje = simpledialog.askstring("Edytuj pozycje", "Nowe pozycje oddzielone przecinkami", initialvalue=", ".join(self.listy[tytul]))
-                if nowe_pozycje:
-                    self.listy[tytul] = [p.strip() for p in nowe_pozycje.split(',')]
-                    self.odswiez_liste()
-                    skladnik_okno.destroy()
-                    wynik_okno.destroy()
-                    messagebox.showinfo("Zmieniono", f"Zaktualizowano listę: {tytul}")
-
-            btn_frame = tk.Frame(skladnik_okno)
-            btn_frame.pack(pady=10)
-
-            tk.Button(btn_frame, text="Edytuj", command=edytuj).pack(side=tk.LEFT, padx=5)
-            tk.Button(btn_frame, text="Zamknij", command=skladnik_okno.destroy).pack(side=tk.LEFT, padx=5)
-
-        wynik_listbox.bind("<Double-1>", pokaz_skladniki)
+        zamknij_btn = tk.Button(wynik_okno, text="Zamknij", command=wynik_okno.destroy)
+        zamknij_btn.pack(pady=(0, 10))
 
     def zapisz_do_pliku(self):
         sciezka = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Pliki tekstowe", "*.txt")])
@@ -173,17 +148,18 @@ class AplikacjaListaZakupow:
 
     def wyswielt_i_edytuj_liste(self, event=None, tytul=None):
         if event:
-            wybor = self.listbox.curselection()
+            widget = event.widget
+            wybor = widget.curselection()
             if not wybor:
                 return
-            tytul = self.listbox.get(wybor)
+            tytul = widget.get(wybor[0])
         if tytul is None:
             return
 
         okno = Toplevel(self.root)
         okno.title(f"Lista: {tytul}")
         okno.resizable(False, False)
-        self.ustaw_okno(350, 300, 0, 100, okno)
+        self.ustaw_okno(300, 225, 0, 100, okno)
         okno.focus_force()
 
         oryginalne = list(self.listy[tytul])
@@ -234,7 +210,6 @@ class AplikacjaListaZakupow:
         tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz).pack(side=tk.LEFT, padx=5)
 
         okno.protocol("WM_DELETE_WINDOW", zamknij_okno)
-
 
     def odswiez_liste(self):
         self.listbox.delete(0, tk.END)
