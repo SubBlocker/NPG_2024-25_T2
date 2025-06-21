@@ -18,6 +18,7 @@ Interaktywna aplikacja do tworzenia i zarządzania listami zakupów.
 
 ### Instalacja
 
+## 🧩 Jak korzystać
 
 ## 📄 Licencja
 
