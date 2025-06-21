@@ -37,13 +37,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller reportlab
-
-    - name: Budowanie aplikacji
+    
+    - name: Budowanie aplikacji (Windows)
+      if: matrix.os == 'windows-latest'
       run: |
-        pyinstaller --onefile --windowed \
-            --add-data "DejaVuSans.ttf:." \
-            --add-data "DejaVuSans-Bold.ttf:." \
-            main.py
+        pyinstaller --onefile --windowed --add-data "DejaVuSans.ttf;." --add-data "DejaVuSans-Bold.ttf;." main.py
+
+    - name: Budowanie aplikacji (UNIX)
+      if: matrix.os != 'windows-latest'
+      run: |
+        pyinstaller --onefile --windowed --add-data "DejaVuSans.ttf:." --add-data "DejaVuSans-Bold.ttf:." main.py
 
     - name: Przeniesienie pliku wykonywalnego z nazwą systemu
       run: |
