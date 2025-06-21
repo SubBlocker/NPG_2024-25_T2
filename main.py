@@ -79,7 +79,6 @@ class AplikacjaListaZakupow:
 
         self.root.protocol("WM_DELETE_WINDOW", self.zamknij_okno)
 
-
     # Funkcjonalności
 
     def dodaj_liste(self):
@@ -87,7 +86,7 @@ class AplikacjaListaZakupow:
         if tytul is None:
             return
         while not tytul:
-            messagebox.showwarning("Błąd", "Podaj tytuł listy")
+            messagebox.showwarning("Błąd", "Podaj tytuł listy.")
             tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
             if tytul is None:
                 return
@@ -104,6 +103,7 @@ class AplikacjaListaZakupow:
     def usun_liste(self):
         wybor = self.listbox.curselection()
         if not wybor:
+            messagebox.showwarning("Błąd", "Nie zaznaczono listy.")
             return
         indeks = wybor[0]
         tytul = self.listbox.get(indeks)
@@ -116,12 +116,12 @@ class AplikacjaListaZakupow:
             self.listbox.activate(nastepny_wybor)
 
     def szukaj_listy(self):
-        zapytanie = simpledialog.askstring("Szukaj", "Wpisz co najmniej 3 znaki (nazwa lub pozycja)")
+        zapytanie = simpledialog.askstring("Szukaj", "Wpisz co najmniej 3 znaki (nazwa lub pozycja):")
         if zapytanie is None:
                 return
         while len(zapytanie.strip()) < 3:
             messagebox.showwarning("Błąd", "Wprowadź co najmniej 3 znaki.")
-            zapytanie = simpledialog.askstring("Szukaj", "Wpisz co najmniej 3 znaki (nazwa lub pozycja)")
+            zapytanie = simpledialog.askstring("Szukaj", "Wpisz co najmniej 3 znaki (nazwa lub pozycja):")
             if zapytanie is None:
                 return
 
@@ -156,6 +156,9 @@ class AplikacjaListaZakupow:
         zamknij_btn.pack(pady=(0, 10))
 
     def zapisz_do_pliku(self):
+        if not self.listy:
+            messagebox.showwarning("Błąd", "Brak list zakupów do zapisania!")
+            return
         sciezka = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Pliki tekstowe", "*.txt")])
         if sciezka:
             with open(sciezka, 'w', encoding='utf-8') as f:
@@ -204,15 +207,24 @@ class AplikacjaListaZakupow:
 
         def dodaj():
             nowa = simpledialog.askstring("Dodaj pozycje", "Wpisz nowe pozycje  po przecinku:", parent=okno)
-            if nowa:
-                for pozycja in nowa.split(','):
-                    p = pozycja.strip()
-                    if p:
-                        lista.insert(tk.END, p)
+            if nowa is None:
+                return
+            while not (nowa.replace(' ','')).replace(',',''):
+                messagebox.showwarning("Błąd", "Elementy muszą mieć nazwę.")
+                nowa = simpledialog.askstring("Dodaj pozycje", "Wpisz nowe pozycje  po przecinku:", parent=okno)
+                if nowa is None:
+                    return
+            
+            for pozycja in nowa.split(','):
+                p = pozycja.strip()
+                if p:
+                    lista.insert(tk.END, p)
 
         def usun():
             zaznaczony = lista.curselection()
             if not zaznaczony:
+                messagebox.showwarning("Błąd", "Nie zaznaczono elementu.")
+                okno.focus_force()
                 return
             lista.delete(zaznaczony[0])
             if lista.size() > 0:
@@ -243,7 +255,6 @@ class AplikacjaListaZakupow:
                     zapisz()
             self.edycje_okien.pop(tytul, None)
             okno.destroy()
-
 
         przyciski = tk.Frame(okno, bg="#f0f4f8")
         przyciski.pack(pady=(0, 2))
@@ -288,7 +299,7 @@ class AplikacjaListaZakupow:
 
     def eksportuj_do_pdf(self):
         if not self.listy:
-            messagebox.showwarning("Brak list", "Brak list zakupów do wyeksportowania!")
+            messagebox.showwarning("Błąd", "Brak list zakupów do wyeksportowania!")
             return
 
         sciezka = filedialog.asksaveasfilename(
