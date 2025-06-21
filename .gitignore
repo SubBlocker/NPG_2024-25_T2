@@ -19,7 +19,7 @@ Thumbs.db
 
 # Ignoruj pliki konfiguracyjne PyInstaller
 build/
-_internal/
+dist/
 *.spec
 
 # Ignoruj listy zapisywane przez program
