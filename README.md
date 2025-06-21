@@ -15,8 +15,11 @@ Interaktywna aplikacja do tworzenia i zarządzania listami zakupów.
 
 ### Wymagania
 
+1. Winowds, Linux lub macOS
 
 ### Instalacja
+
+Przebieg instalacji znajduje się [tutaj](https://github.com/SubBlocker/NPG_2024-25_T2/releases).
 
 ## 🧩 Jak korzystać
 
