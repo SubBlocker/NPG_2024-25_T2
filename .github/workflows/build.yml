@@ -40,7 +40,10 @@ jobs:
 
     - name: Budowanie aplikacji
       run: |
-        pyinstaller main.spec
+        pyinstaller --onefile --windowed \
+            --add-data "DejaVuSans.ttf:." \
+            --add-data "DejaVuSans-Bold.ttf:." \
+            main.py
 
     - name: Przeniesienie pliku wykonywalnego z nazwą systemu
       run: |
