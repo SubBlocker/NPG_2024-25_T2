@@ -103,10 +103,15 @@ class AplikacjaListaZakupow:
     def usun_liste(self):
         wybor = self.listbox.curselection()
         if not wybor:
-            messagebox.showwarning("Błąd", "Nie zaznaczono listy.")
             return
         indeks = wybor[0]
         tytul = self.listbox.get(indeks)
+
+        potwierdzenie = messagebox.askyesno(
+            "Potwierdzenie usunięcia", f"Czy napewno usunąć liste: {tytul} ?", icon='warning'
+        )
+        if not potwierdzenie:
+            return
         del self.listy[tytul]
         self.odswiez_liste()
 
