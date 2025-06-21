@@ -20,7 +20,7 @@ exe = EXE(
     pyz,
     a.scripts,
     [],
-    exclude_binaries=True,
+    exclude_binaries=False,
     name='main',
     debug=False,
     bootloader_ignore_signals=False,
