@@ -46,7 +46,7 @@ jobs:
       shell: bash
 
     - name: Upload artefaktów
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ListaZakupow-${{ matrix.label }}
         path: dist-artifacts/*
