@@ -103,6 +103,7 @@ class AplikacjaListaZakupow:
     def usun_liste(self):
         wybor = self.listbox.curselection()
         if not wybor:
+            messagebox.showwarning("Błąd", "Nie zaznaczono listy.")
             return
         indeks = wybor[0]
         tytul = self.listbox.get(indeks)
@@ -319,6 +320,7 @@ class AplikacjaListaZakupow:
             folder = os.path.dirname(os.path.abspath(__file__))
             pdfmetrics.registerFont(TTFont("DejaVuSans", os.path.join(folder, "DejaVuSans.ttf")))
             pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", os.path.join(folder, "DejaVuSans-Bold.ttf")))
+
             c = canvas.Canvas(sciezka, pagesize=A4)
             szerokosc, wysokosc = A4
             nazwa = os.path.splitext(os.path.basename(sciezka))[0]
