@@ -1,5 +1,3 @@
-#Budujemy na tym pliku, tu działa autozapis do .txt
-
 import tkinter as tk
 from tkinter import messagebox, simpledialog, filedialog, Toplevel
 from tkinter import filedialog, messagebox
@@ -8,6 +6,7 @@ from reportlab.pdfgen import canvas             # type: ignore
 from reportlab.pdfbase import pdfmetrics        # type: ignore
 from reportlab.pdfbase.ttfonts import TTFont    # type: ignore
 import os
+import sys
 
 # Plik do automatycznego zapisu
 PLIK = "listy_zakupow.txt"
@@ -317,7 +316,11 @@ class AplikacjaListaZakupow:
             return  # użytkownik anulował zapis
 
         try:
-            folder = os.path.dirname(os.path.abspath(__file__))
+            if getattr(sys, 'frozen', False):
+                folder = sys._MEIPASS
+            else:
+                folder = os.path.dirname(os.path.abspath(__file__))
+
             pdfmetrics.registerFont(TTFont("DejaVuSans", os.path.join(folder, "DejaVuSans.ttf")))
             pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", os.path.join(folder, "DejaVuSans-Bold.ttf")))
 

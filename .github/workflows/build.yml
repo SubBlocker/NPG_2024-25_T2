@@ -40,7 +40,7 @@ jobs:
 
     - name: Budowanie aplikacji
       run: |
-        pyinstaller --noconfirm --onefile --windowed main.py
+        pyinstaller --noconfirm --onefile --windowed main.spec
 
     - name: Przeniesienie pliku wykonywalnego z nazwą systemu
       run: |
