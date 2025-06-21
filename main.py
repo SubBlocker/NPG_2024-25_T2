@@ -25,7 +25,7 @@ class AplikacjaListaZakupow:
 
 
         # Nagłówek
-        self.label = tk.Label(root, text="Twoje Listy Zakupów", font=("Arial", 16, "bold"), bg="#f0f4f8")
+        self.label = tk.Label(root, text="Twoje Listy Zakupów", font=("DejaVuSans", 16, "bold"), bg="#f0f4f8")
         self.label.pack(pady=10)
 
         # Interfejs użytkownika (jeden frame do gridowania przycisków)
@@ -68,7 +68,7 @@ class AplikacjaListaZakupow:
         )
         self.exit_button.grid(row=1, column=2, padx=5, pady=5)
 
-        self.listbox = tk.Listbox(root, font=("Arial", 12), height=15, bg="white", selectbackground="#c0d6e4")
+        self.listbox = tk.Listbox(root, font=("DejaVuSans", 12), height=15, bg="white", selectbackground="#c0d6e4")
         self.listbox.pack(pady=10, fill=tk.BOTH, expand=True, padx=10)
 
         self.listbox.bind('<Double-1>', lambda event: self.wyswielt_i_edytuj_liste(event))
@@ -143,7 +143,7 @@ class AplikacjaListaZakupow:
         self.ustaw_okno(400, 250, 0, 80, wynik_okno)
         wynik_okno.focus_force()
 
-        wynik_listbox = tk.Listbox(wynik_okno, width=50, height=10, font=("Arial", 12))
+        wynik_listbox = tk.Listbox(wynik_okno, width=50, height=10, font=("DejaVuSans", 12))
         wynik_listbox.pack(padx=10, pady=10)
 
         for tytul in wyniki:
@@ -311,35 +311,37 @@ class AplikacjaListaZakupow:
             return  # użytkownik anulował zapis
 
         try:
-            pdfmetrics.registerFont(TTFont("Arial", "Arial.ttf"))
+            folder = os.path.dirname(os.path.abspath(__file__))
+            pdfmetrics.registerFont(TTFont("DejaVuSans", os.path.join(folder, "DejaVuSans.ttf")))
+            pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", os.path.join(folder, "DejaVuSans-Bold.ttf")))
             c = canvas.Canvas(sciezka, pagesize=A4)
             szerokosc, wysokosc = A4
             nazwa = os.path.splitext(os.path.basename(sciezka))[0]
             y = wysokosc - 50
 
-            c.setFont("Arial", 16)
+            c.setFont("DejaVuSans", 16)
             c.drawString(50, y, nazwa)
             y -= 40
 
-            c.setFont("Arial", 12)
+            c.setFont("DejaVuSans", 12)
             for tytul, pozycje in self.listy.items():
                 if y < 100:
                     c.showPage()  # nowa strona PDF
                     y = wysokosc - 50
-                    c.setFont("Arial", 12)
+                    c.setFont("DejaVuSans", 12)
 
-                c.setFont("Arial", 14)
+                c.setFont("DejaVuSans-Bold", 14)
                 c.drawString(50, y, f"{tytul}:")
                 y -= 20
 
-                c.setFont("Arial", 12)
+                c.setFont("DejaVuSans", 12)
                 for pozycja in pozycje:
                     c.drawString(70, y, f"- {pozycja}")
                     y -= 15
                     if y < 50:
                         c.showPage()
                         y = wysokosc - 50
-                        c.setFont("Arial", 12)
+                        c.setFont("DejaVuSans", 12)
 
                 y -= 10  # odstęp między listami
 
