@@ -92,6 +92,11 @@ class AplikacjaListaZakupow:
             tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
             if tytul is None:
                 return
+        while '|' in tytul:
+            messagebox.showwarning("Błąd", "Nazwa listy nie może zawierać '|'")
+            tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
+            if tytul is None:
+                return
         while tytul in self.listy:
             messagebox.showwarning("Błąd", "Lista o tym tytule już istnieje")
             tytul = simpledialog.askstring("Nowa lista", "Podaj nazwę listy:")
@@ -171,7 +176,7 @@ class AplikacjaListaZakupow:
         if sciezka:
             with open(sciezka, 'w', encoding='utf-8') as f:
                 for tytul, pozycje in self.listy.items():
-                    f.write(f"{tytul}:{','.join(pozycje)}\n")
+                    f.write(f"{tytul}|{','.join(pozycje)}\n")
             messagebox.showinfo("Zapisano", f"Zapisano do {sciezka}")
 
     def wyswielt_i_edytuj_liste(self, event=None, tytul=None):
@@ -263,7 +268,7 @@ class AplikacjaListaZakupow:
         def zamknij():
             aktualne = [lista.get(i) for i in range(lista.size())]
             if aktualne != oryginalne:
-                if messagebox.askyesno("Niezapisane zmiany", "Masz niezapisane zmiany. Czy chcesz je zapisać?"):
+                if messagebox.askyesno("Niezapisane zmiany", "Masz niezapisane zmiany. Czy chcesz je zapisać?", parent=okno):
                     zapisz()
             self.edycje_okien.pop(tytul, None)
             okno.destroy()
@@ -282,6 +287,8 @@ class AplikacjaListaZakupow:
 
         tk.Button(przyciski, text="Zapisz i zamknij", command=zapisz, bg="#9C27B0", activebackground="#7b1fa2", **btn_style).grid(row=1, column=1, padx=5, pady=5)
 
+        okno.protocol("WM_DELETE_WINDOW", zamknij)
+
     def odswiez_liste(self):
         self.listbox.delete(0, tk.END)
         for tytul in self.listy:
@@ -290,14 +297,14 @@ class AplikacjaListaZakupow:
     def zapisz_liste(self):
         with open(PLIK, 'w', encoding='utf-8') as f:
             for tytul, pozycje in self.listy.items():
-                f.write(f"{tytul}:{','.join(pozycje)}\n")
+                f.write(f"{tytul}|{','.join(pozycje)}\n")
 
     def wczytaj_liste(self):
         if os.path.exists(PLIK):
             with open(PLIK, 'r', encoding='utf-8') as f:
                 for linia in f:
-                    if ':' in linia:
-                        tytul, pozycje = linia.strip().split(':', 1)
+                    if '|' in linia:
+                        tytul, pozycje = linia.strip().split('|', 1)
                         self.listy[tytul] = [p.strip() for p in pozycje.split(',') if p.strip()]
 
     def ustaw_okno(self, okno_szerokosc: int, okno_wysokosc: int, x: int, y: int, okno):
