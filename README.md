@@ -13,7 +13,11 @@ Interaktywna aplikacja do tworzenia i zarządzania listami zakupów.
 
 ## 🚀 Jak uruchomić
 
-Aby korzystać z aplikacji możesz skopiować kod źródłowy i skompilować go samodzielnie lub pobrać gotowy program zgodnie z Instrukcją Instalacji.
+Aby korzystać z aplikacji możesz: 
+
+-skopiować kod źródłowy i skompilować go samodzielnie(pamiętaj aby w katalogu programu umieścić także pliki DejaVuSans.ttf oraz DejaVuSans-Bold.ttf)
+
+-pobrać gotowy program zgodnie z Instrukcją Instalacji.
 
 ### Wymagania
 
@@ -35,12 +39,15 @@ Otwórz listę poprzez dwukrotne kliknięcie na nią. Teraz możesz:
 Po dokonaniu zmian, "Zapisz i zamknij".
 4. Zapisywanie listy do pliku tekstowego
 Należy samodzielnie utworzyć plik tekstowy. Następnie zaznacz opcję Zapisz do pliku i wskaż lokalizację utworzonego wcześniej pliku. Wszystkie aktualne listy zostaną eksportowane do tego pliku.
-5. Wyszukiwanie list
+5. Zapisywanie list do pliku PDF
+Należy samodzielnie utworzyć plik PDF. Następnie zaznacz opcję Eksportuj do PDF i wskaż lokalizację utworzonego wcześniej pliku. Wszystkie aktualne listy zostaną eksportowane do tego pliku.
+6. Wyszukiwanie list
 Kliknij Szukaj listy i wpisz fragment bądź całą nazwę listy lub produktu jaki Cię interesuje. Wyświetli się spis list, które spełniają wyszukiwanie. Możesz teraz otworzyć listę dwukrotnym kliknięciem.
-6. Usuwanie listy.
+7. Usuwanie listy.
 Zaznacz listę, którą chcesz usunąć i kliknij Usuń listę. Potwierdź.
 
 ## Uwaga
+
 Jeśli nie możesz korzystać z myszki komputerowej, z aplikacji możesz korzystać także za pomocą tylko klawiatury. Po opcjach można przemieszczać się klikając "Tab", po spisach list i produktów strzałkami, natomiast "Spacja" oznacza potwierdzenie wyboru.
 
 ## 📄 Licencja
