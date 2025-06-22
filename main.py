@@ -17,7 +17,10 @@ class AplikacjaListaZakupow:
         self.root.title("Lista Zakupów")
         self.root.resizable(False, False)
         self.root.configure(bg="#f0f4f8")  # już jedno ustawienie wystarczy
-        self.ustaw_okno(400, 500, 0, 0, self.root) # ustawia okno 
+        if sys.platform.startswith('win'):
+            self.ustaw_okno(400, 500, 0, 0, self.root)
+        else:
+            self.ustaw_okno(485, 500, 0, 0, self.root)
 
         self.listy = {}
         self.edycje_okien = {}
@@ -193,7 +196,11 @@ class AplikacjaListaZakupow:
         self.edycje_okien[tytul] = okno
         okno.title(f"Lista: {tytul}")
         okno.resizable(False, False)
-        self.ustaw_okno(370, 265, 0, 100, okno)
+        okno.configure(bg="#f0f4f8")
+        if sys.platform.startswith('win'):
+            self.ustaw_okno(370, 265, 0, 100, okno)
+        else:
+            self.ustaw_okno(370, 310, 0, 100, okno)
         okno.focus_force()
 
         oryginalne = list(self.listy[tytul])
@@ -215,7 +222,7 @@ class AplikacjaListaZakupow:
             if nowa is None:
                 return
             while not (nowa.replace(' ','')).replace(',',''):
-                messagebox.showwarning("Błąd", "Elementy muszą mieć nazwę.")
+                messagebox.showwarning("Błąd", "Elementy muszą mieć nazwę.", parent=okno)
                 nowa = simpledialog.askstring("Dodaj pozycje", "Wpisz nowe pozycje  po przecinku:", parent=okno)
                 if nowa is None:
                     return
@@ -228,7 +235,7 @@ class AplikacjaListaZakupow:
         def usun():
             zaznaczony = lista.curselection()
             if not zaznaczony:
-                messagebox.showwarning("Błąd", "Nie zaznaczono elementu.")
+                messagebox.showwarning("Błąd", "Nie zaznaczono elementu.", parent=okno)
                 okno.focus_force()
                 return
             lista.delete(zaznaczony[0])
@@ -244,7 +251,7 @@ class AplikacjaListaZakupow:
                 return
             nowa = nowa.strip()
             if nowa in self.listy:
-                messagebox.showerror("Błąd", "Lista o takiej nazwie już istnieje.")
+                messagebox.showerror("Błąd", "Lista o takiej nazwie już istnieje.", parent=okno)
                 return
 
             self.listy[nowa] = self.listy.pop(tytul)
@@ -262,6 +269,7 @@ class AplikacjaListaZakupow:
             okno.destroy()
 
         przyciski = tk.Frame(okno, bg="#f0f4f8")
+        self.przyciski_frame.grid_propagate(False)
         przyciski.pack(pady=(0, 2))
 
         btn_style = dict(width=18, fg="white", relief=tk.FLAT)
